@@ -3,13 +3,17 @@ package org.savindu.inventoryService.service.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.savindu.inventoryService.dto.InventoryRequest;
+import org.savindu.inventoryService.dto.InventoryResponse;
+import org.savindu.inventoryService.dto.SkuRequest;
 import org.savindu.inventoryService.model.Inventory;
 import org.savindu.inventoryService.repository.InventoryRepository;
 import org.savindu.inventoryService.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -21,15 +25,39 @@ public class InventoryServiceImpl implements InventoryService {
 
 
     @Override
-    public boolean isInStock(String skuCode) {
-        Optional<Inventory> bySkuCode = inventoryRepository.findBySkuCode(skuCode);
-        if(bySkuCode.isPresent()){
-            Inventory inventory = bySkuCode.get();
-            log.info("Inventory found: {}", inventory);
-            return inventory.getQuantity() > 0;
+    public List<InventoryResponse> isInStock(List<SkuRequest> skuCode) {
+        List<Inventory> bySkuCodeIn = inventoryRepository.findBySkuCodeIn(
+                skuCode.stream().map(SkuRequest::getSkuCode).toList()
+        );
+
+        List<InventoryResponse> result = new ArrayList<>();
+
+        for (SkuRequest skuRequest : skuCode) {
+            boolean inStock = bySkuCodeIn.stream()
+                    .anyMatch(inventory ->
+                            inventory.getSkuCode().equals(skuRequest.getSkuCode())
+                                    && inventory.getQuantity() >= skuRequest.getQuantity()
+                    );
+
+            result.add(new InventoryResponse(skuRequest.getSkuCode(), inStock));
         }
-        log.info("Inventory not found for skuCode: {}", skuCode);
-        return false;
+
+        return result;
+    }
+
+    @Override
+    public void createInventory(InventoryRequest inventoryRequest) {
+        Inventory inventory = new Inventory();
+        inventory.setSkuCode(inventoryRequest.getSkuCode());
+        inventory.setQuantity(inventoryRequest.getQuantity());
+        inventoryRepository.save(inventory);
+    }
+
+    @Override
+    public void updateInventory(String skuCode, Long quantity) {
+        Inventory bySkuCode = inventoryRepository.findBySkuCode(skuCode).orElseThrow(() -> new RuntimeException("Inventory not found"));
+        bySkuCode.setQuantity(quantity);
+        inventoryRepository.save(bySkuCode);
 
     }
 }
