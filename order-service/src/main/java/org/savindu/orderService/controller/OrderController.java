@@ -1,20 +1,31 @@
 package org.savindu.orderService.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.savindu.orderService.dto.OrderRequest;
 import org.savindu.orderService.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/orders")
+@RequiredArgsConstructor
 public class OrderController {
-    @Autowired
-    private OrderService orderService;
+
+    private final OrderService orderService;
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public String createOrder(@RequestBody OrderRequest orderRequest) {
-        return orderService.placeOrder(orderRequest);
+
+    public ResponseEntity<String> createOrder(@RequestBody OrderRequest orderRequest) {
+        try {
+            String s = orderService.placeOrder(orderRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(s);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
 
     }
 }
