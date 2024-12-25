@@ -10,22 +10,26 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
         </processorPath>
-        <module name="__lib-common" />
+        <module name="api-gateway" />
         <module name="product-service" />
         <module name="order-service" />
         <module name="inventory-service" />
         <module name="discovery-server" />
+        <module name="lib-common" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="__lib-common" target="16" />
       <module name="lib-common (1)" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="__lib-common" options="-parameters" />
+      <module name="api-gateway" options="-parameters" />
       <module name="discovery-server" options="-parameters" />
       <module name="inventory-service" options="-parameters" />
+      <module name="lib-common" options="-parameters" />
       <module name="order-service" options="-parameters" />
       <module name="product-service" options="-parameters" />
     </option>

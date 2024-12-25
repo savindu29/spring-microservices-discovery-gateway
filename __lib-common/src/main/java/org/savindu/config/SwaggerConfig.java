@@ -1,13 +1,17 @@
 package org.savindu.config;
 
 import lombok.Data;
+import org.savindu.annotation.EnableSwaggerUrlLogger;
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+
 
 @Data
 @Configuration("swaggerConfigProperties")
 @PropertySource("classpath:swagger.properties")
+@EnableSwaggerUrlLogger
 public class SwaggerConfig {
     
 	@Value("${api.version}")
@@ -54,4 +58,6 @@ public class SwaggerConfig {
     
 	@Value("${swagger.authheader.default}")
     private String defaultAuthorizationHeader;
+
+
 }
