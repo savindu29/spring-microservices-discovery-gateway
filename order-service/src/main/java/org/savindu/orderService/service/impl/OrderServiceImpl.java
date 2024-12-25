@@ -51,7 +51,7 @@ public class OrderServiceImpl implements OrderService {
 
         // call inventory service to check the stock
         InventoryResponse[] inventoryResponses = webClientBuilder.build().post()
-                .uri("http://inventory-service/api/v1/inventory")
+                .uri("http://inventory-service/api/inventory-service/inventory")
                 .body(Mono.just(skuRequests), List.class)
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class)
