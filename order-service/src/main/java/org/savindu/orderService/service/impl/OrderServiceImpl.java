@@ -31,7 +31,7 @@ import java.util.UUID;
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
-    private final WebClient webClient;
+    private final WebClient.Builder webClientBuilder;
 
     @Override
     public String placeOrder(OrderRequest orderRequest) throws RuntimeException {
@@ -50,8 +50,8 @@ public class OrderServiceImpl implements OrderService {
         )).toList();
 
         // call inventory service to check the stock
-        InventoryResponse[] inventoryResponses = webClient.post()
-                .uri("http://localhost:8083/api/v1/inventory")
+        InventoryResponse[] inventoryResponses = webClientBuilder.build().post()
+                .uri("http://inventory-service/api/v1/inventory")
                 .body(Mono.just(skuRequests), List.class)
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class)
@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
         }else{
             log.info("Items are in stock and order is placed");
             orderRepository.save(order);
-            return order.getOrderNumber();
+            return "Order placed successfully";
         }
 
     }
