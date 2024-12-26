@@ -26,6 +26,7 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public List<InventoryResponse> isInStock(List<SkuRequest> skuCode) {
+        log.info("Start checking inventory");
         List<Inventory> bySkuCodeIn = inventoryRepository.findBySkuCodeIn(
                 skuCode.stream().map(SkuRequest::getSkuCode).toList()
         );
@@ -41,6 +42,7 @@ public class InventoryServiceImpl implements InventoryService {
 
             result.add(new InventoryResponse(skuRequest.getSkuCode(), inStock));
         }
+        log.info("End checking inventory");
 
         return result;
     }

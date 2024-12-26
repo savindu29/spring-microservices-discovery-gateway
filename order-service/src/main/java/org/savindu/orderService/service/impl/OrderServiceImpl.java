@@ -1,9 +1,12 @@
 package org.savindu.orderService.service.impl;
 
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.core5.concurrent.CompletedFuture;
 import org.savindu.orderService.dto.InventoryResponse;
 import org.savindu.orderService.dto.OrderLineItemDto;
 import org.savindu.orderService.dto.OrderRequest;
@@ -22,6 +25,7 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 
 @Service
@@ -34,7 +38,9 @@ public class OrderServiceImpl implements OrderService {
     private final WebClient.Builder webClientBuilder;
 
     @Override
-    public String placeOrder(OrderRequest orderRequest) throws RuntimeException {
+    @CircuitBreaker(name="inventory", fallbackMethod = "fallbackMethod")
+    @TimeLimiter(name = "inventory")
+    public CompletableFuture<String> placeOrder(OrderRequest orderRequest) throws RuntimeException {
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
 
@@ -66,7 +72,8 @@ public class OrderServiceImpl implements OrderService {
         }else{
             log.info("Items are in stock and order is placed");
             orderRepository.save(order);
-            return "Order placed successfully";
+            return CompletableFuture.supplyAsync(()->"Order placed successfully") ;
+
         }
 
     }
@@ -81,5 +88,9 @@ public class OrderServiceImpl implements OrderService {
 
 
     }
+    public CompletableFuture<String>  fallbackMethod(OrderRequest orderRequest,RuntimeException runtimeException)  {
+        return CompletableFuture.supplyAsync(()->"Oops! something went wrong. Please try again later") ;
+    }
+
 
 }
